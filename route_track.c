@@ -9,7 +9,7 @@
 
 
 void route_track_track() {
-
+/*
   if (route_track_qti_L1 == 1 && route_track_qti_R1 == 0) {
     motor_cw();
   }
@@ -24,6 +24,20 @@ void route_track_track() {
 
   if (route_track_qti_R1 == 1 && route_track_qti_L1 == 0) {
     motor_ccw();
+  }
+
+  if (route_track_qti_L2 == 0 && route_track_qti_R2 == 0) {
+    motor_forward();
+  }
+*/
+  if (route_track_qti_L1 == 1 && route_track_qti_R1 == 0) {
+    motor_ccw();
+  }
+  else if (route_track_qti_L1 == 0 && route_track_qti_R1 == 1) {
+    motor_cw();
+  }
+  else{
+    motor_forward();
   }
 }
 

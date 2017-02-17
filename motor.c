@@ -73,7 +73,7 @@ void motor_speed(char speed) {
     break;
 
     case 3:
-    step = 100;
+    step = 125;
     break;
 
     default:
