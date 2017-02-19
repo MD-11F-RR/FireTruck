@@ -10,7 +10,7 @@
 
 
 void route_track_track() {
-  	if ((route_track_qti_R1 | route_track_qti_L1) == 0) {//条件未编译测试，，要留意
+  	if (route_track_qti_R1 == 0 && route_track_qti_L1 == 0) {//条件未编译测试，，要留意
   		if (route_track_qti_R2 == route_track_qti_L2) {
   			motor_forward();
   		}
@@ -25,6 +25,7 @@ void route_track_track() {
 		//差速转弯
 
 		else {
+      /*
   			if (route_track_qti_L1 == 1 && route_track_qti_R1 == 0) {
   				motor_ccw();
   			}
@@ -32,8 +33,12 @@ void route_track_track() {
 				else{
 					motor_cw();
 				}
+        //当外侧两QTI检测到黑色时采用比较激进的转弯方式
+        */
   	}
-		//当外侧两QTI检测到黑色时采用比较激进的转弯方式
+		motor_backward();
+
+
 }
 
 void route_track_shutdown() {
