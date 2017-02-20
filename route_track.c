@@ -6,7 +6,9 @@
   sbit route_track_qti_R2 = P1^3;
   sbit route_track_qti_R1 = P1^2;
   //4个QTI传感器定位
-	//黑色返回高电平！！！
+  //从左到右
+  //  L1  L2  R2  R1
+	//黑色返回高电平
 
 
 void route_track_track() {
@@ -21,7 +23,6 @@ void route_track_track() {
 			else{
 				motor_left();
 			}
-      //motor_forward();
   	}
 		//当外侧两QTI检测全为白色信号时使用内侧进行微调，，全黑或全白均前进，一边黑时
 		//差速转弯
@@ -39,8 +40,6 @@ void route_track_track() {
           motor_stop();
         }
   	}
-
-
 }
 
 void route_track_shutdown() {
