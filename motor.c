@@ -73,7 +73,7 @@ void motor_speed(char speed) {
     break;
 
     case 3:
-    step = 125;
+    step = 75;
     break;
 
     default:
@@ -95,16 +95,16 @@ void motor_ccw() {
 //电机逆时针
 
 void motor_left() {
-  pwm_motorL = MID_POINT;
+  pwm_motorL = MID_POINT - step / 3;
   pwm_motorR = MID_POINT + step;
 }
-//左转弯，左侧电机停止，右侧电机以原先速度转动
+//左转弯，左侧电机以0.5倍速度转，右侧电机以原先速度转动，差速测试
 
 void motor_right() {
   pwm_motorL = MID_POINT - step;
-  pwm_motorR = MID_POINT;
+  pwm_motorR = MID_POINT + step / 3;
 }
-//右转弯，右侧电机停止，左侧电机以原先速度转动
+//右转弯，右侧电机以0.5倍速度转，左侧电机以原先速度转动，差速测试
 
 void motor_cw() {
   pwm_motorL = MID_POINT - step;
