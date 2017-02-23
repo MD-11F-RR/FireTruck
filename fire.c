@@ -1,6 +1,6 @@
 #include "AT89X52.H"
 #include "motor.h"
-#include "Boebot.h"
+#include "delay.h"
 
 sbit fire_sensor_L1 = P1^6;
 sbit fire_sensor_L2 = P1^7;
@@ -47,9 +47,8 @@ char fire_detected() {
 			return 2;
 		}
   }
-  else{
-    return 0;
-  }
+
+  return 0;
   //检测函数，任意一个火焰传感器检测到火，消去抖动后即返回检测到火的传感器
 	//从左到右L1	L2	M	R2	R1	分别返回1	2	3	4	5
 	//返回0代表没有检测到火焰
@@ -61,47 +60,41 @@ void fire_putout() {
 
   motor_stop();
   while (1) {
-    switch (fire_detected()) {
-  		case 3:
-  		motor_stop();
-  		break;
-			//中间传感器检测到火焰后停止电机
+      while(fire_detected() != 3){
 
-  		case 2:
-  		motor_speed(2);
-  		motor_ccw();
-  		break;
+        switch (fire_detected()) {
+      		case 2:
+      		motor_speed(2);
+      		motor_ccw();
+      		break;
 
-  		case 4:
-  		motor_speed(2);
-  		motor_cw();
-  		break;
-			//靠内两个传感器检测到火焰后减速转向
+      		case 4:
+      		motor_speed(2);
+      		motor_cw();
+      		break;
+    			//靠内两个传感器检测到火焰后减速转向
 
-      case 1:
-  		motor_speed(3);
-  		motor_ccw();
-  		break;
+          case 1:
+      		motor_speed(3);
+      		motor_ccw();
+      		break;
 
-      case 5:
-      motor_speed(3);
-      motor_cw();
-      break;
+          case 5:
+          motor_speed(3);
+          motor_cw();
+          break;
 
-			default:
-			//default不做任何动作，延续之前动作
-			break;
-  	}
-    while(fire_detected != 3){
-			if (0) {
-				break;
-				//预留，当误检测时允许取消操作
+    			default:
+    			//default不做任何动作，延续之前动作
+    			break;
 			}
 		}
+    motor_stop();
 
     if (fire_detected() == 3) {
       fire_fan = 0;
       while(!fire_detected());
+      delay_nms(2000);
       fire_fan = 1;
 
       break;
