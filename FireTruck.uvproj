@@ -361,7 +361,7 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Source Group 1</GroupName>
+          <GroupName>driver</GroupName>
           <Files>
             <File>
               <FileName>STARTUP.A51</FileName>
@@ -374,14 +374,29 @@
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>motor.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\motor.c</FilePath>
-            </File>
-            <File>
               <FileName>route_track.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\route_track.c</FilePath>
+            </File>
+            <File>
+              <FileName>fire.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\fire.c</FilePath>
+            </File>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\delay.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>hardware</GroupName>
+          <Files>
+            <File>
+              <FileName>motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\motor.c</FilePath>
             </File>
           </Files>
         </Group>
