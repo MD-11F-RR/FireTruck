@@ -13,6 +13,16 @@ L1  L2  M R2  R1
 检测到火焰返回低电平
 */
 
+
+extern sbit route_track_qti_L1 = P1^5;
+extern sbit route_track_qti_L2 = P1^4;
+extern sbit route_track_qti_R2 = P1^3;
+extern sbit route_track_qti_R1 = P1^2;
+  //4个QTI传感器定位
+  //从左到右
+  //  L1  L2  R2  R1
+	//黑色返回高电平
+
 sbit fire_fan = P2^4;
 //灭火风扇，给低电平时转
 
@@ -55,11 +65,29 @@ char fire_detected() {
 }
 
 void fire_putout() {
-  //bit fire_status = 1;
-  //表示火还没灭，供循环用
-
+  char fire_before = 0;
+  char fire_passline = 0
+  char 
   motor_stop();
+  if (route_track_qti_L1 == 1) {
+    delay_nus(15);
+    if (route_track_qti_L1 == 1){
+      fire_before = 1;
+    }
+  }
+  else if (route_track_qti_R1 == 1) {
+    delay_nus(15);
+    if (route_track_qti_R1 == 1){
+      fire_before = 2;
+    }
+  }
+
+//以上内容为检测
+
+
+
   while (1) {
+
       while(fire_detected() != 3){
 
         switch (fire_detected()) {
@@ -98,9 +126,11 @@ void fire_putout() {
       fire_fan = 1;
 
       break;
-			//不知道能不能break出大的while1，有待测试！
+			//break大的while1
     }
   }
+
+
 }
 void fire_fan_test(bit key) {
   if (key) {
@@ -110,3 +140,52 @@ void fire_fan_test(bit key) {
     fire_fan = 0;
   }
 }
+
+/*
+
+  motor_stop();
+  while (1) {
+
+      while(fire_detected() != 3){
+
+        switch (fire_detected()) {
+      		case 2:
+      		motor_speed(2);
+      		motor_ccw();
+      		break;
+
+      		case 4:
+      		motor_speed(2);
+      		motor_cw();
+      		break;
+    			//靠内两个传感器检测到火焰后减速转向
+
+          case 1:
+      		motor_speed(3);
+      		motor_ccw();
+      		break;
+
+          case 5:
+          motor_speed(3);
+          motor_cw();
+          break;
+
+    			default:
+    			//default不做任何动作，延续之前动作
+    			break;
+			}
+		}
+    motor_stop();
+
+    if (fire_detected() == 3) {
+      fire_fan = 0;
+      while(!fire_detected());
+      delay_nms(2000);
+      fire_fan = 1;
+
+      break;
+			//break大的while1
+    }
+  }
+
+*/
