@@ -1,27 +1,10 @@
 #include "AT89X52.H"
 #include "motor.h"
 #include "delay.h"
-
-sbit fire_sensor_L1 = P1^6;
-sbit fire_sensor_L2 = P1^7;
-sbit fire_sensor_M  = P2^1;
-sbit fire_sensor_R2 = P2^2;
-sbit fire_sensor_R1 = P2^3;
-/*
-火焰传感器排布（由左到右）
-L1  L2  M R2  R1
-检测到火焰返回低电平
-*/
+#include "qti_sensor.h"
 
 
-extern sbit route_track_qti_L1 = P1^5;
-extern sbit route_track_qti_L2 = P1^4;
-extern sbit route_track_qti_R2 = P1^3;
-extern sbit route_track_qti_R1 = P1^2;
-  //4个QTI传感器定位
-  //从左到右
-  //  L1  L2  R2  R1
-	//黑色返回高电平
+
 
 sbit fire_fan = P2^4;
 //灭火风扇，给低电平时转
@@ -71,15 +54,15 @@ void fire_putout() {
 	bit fire_direction = 0
 	//左转为0，右转为1
   motor_stop();
-  if (route_track_qti_L1 == 1) {
+  if (QTI_L1() == 1) {
     delay_nus(15);
-    if (route_track_qti_L1 == 1){
+    if (QTI_L1() == 1){
       fire_before = 1;
     }
   }
-  else if (route_track_qti_R1 == 1) {
+  else if (QTI_R1() == 1) {
     delay_nus(15);
-    if (route_track_qti_R1 == 1){
+    if (QTI_R1() == 1){
       fire_before = 2;
     }
   }
@@ -123,9 +106,9 @@ void fire_putout() {
 }
 
 bit fire_QTI_L1(){
-	if (route_track_qti_L1 == 1) {
+	if (QTI_L1() == 1) {
 		delay_nus(15);
-		if (route_track_qti_L1 == 1){
+		if (QTI_L1() == 1){
 			fire_before_L1 = 1;
 			return 1;
 		}
@@ -134,9 +117,9 @@ bit fire_QTI_L1(){
 }
 
 bit fire_QTI_R1(){
-	if (route_track_qti_R1 == 1) {
+	if (QTI_R1() == 1) {
 		delay_nus(15);
-		if (route_track_qti_R1 == 1){
+		if (QTI_R1() == 1){
 			fire_before_R1 = 1;
 			return 1;
 		}
@@ -165,7 +148,7 @@ void fire_putout_2(const char spot) {
 
 		case 4:
 		case 5:
-		motor_cw()
+		motor_cw();
 		break;
 
 		case 3:
@@ -224,13 +207,95 @@ void fire_putout_2(const char spot) {
 			break;
 		}
 	}
-
 	//RTB流程
-
-
 }
 
+void fire_putout_3(const char spot) {
+	bit fire_passline_R1 = 0;
+	bit fire_passline_L1 = 0;
 
+	switch (spot) {
+		case 1:
+		case 2:
+		motor_ccw();
+		break;
+
+		case 4:
+		case 5:
+		motor_cw();
+		break;
+
+		case 3:
+		motor_stop();
+		break;
+	}
+	//转向
+	while (fire_detected() != 3) {
+		switch (spot) {
+			case 1:
+			case 2:
+			if (fire_QTI_R1()) {
+				fire_passline_R1 = 1;
+			}
+			break;
+
+			case 4:
+			case 5:
+			if (fire_QTI_L1()) {
+				fire_passline_L1 = 1;
+			}
+			break;
+		}
+
+		if (fire_passline_R1) {
+			if (fire_QTI_L1()) {
+				motor_cw();
+				while (QTI_R2 || qti_L2);
+				return;
+				//!!!!!!!!!!!!!!!!!!!!!!!
+			}
+		}
+		if (fire_passline_L1) {
+			if (fire_QTI_R1()) {
+				motor_ccw();
+				while (QTI_R2 || qti_L2);
+				return;
+				//!!!!!!!!!!!!!!!!!!!!!!!
+			}
+		}
+	}
+	//记录是否越线，有黑即检测
+
+	motor_stop();
+	fire_fan = 0;
+	while(!fire_detected());
+	delay_nms(2500);
+	fire_fan = 1;
+	//停车灭火
+
+	switch (spot) {
+		case 1:
+		case 2:
+		if (fire_passline_R1) {
+			motor_cw();
+			while (QTI_R2 || qti_L2);
+			break;
+		}
+		else{
+			break;
+		}
+
+		case 3:
+		break;
+
+		case 4:
+		case 5:
+		if (fire_passline_L1) {
+			motor_ccw()
+			while (QTI_R2 || qti_L2);
+		}
+	}
+}
 
 
 

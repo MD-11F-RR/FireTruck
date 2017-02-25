@@ -1,23 +1,15 @@
 #include "reg52.h"
 #include "motor.h"
-
-  sbit route_track_qti_L1 = P1^5;
-  sbit route_track_qti_L2 = P1^4;
-  sbit route_track_qti_R2 = P1^3;
-  sbit route_track_qti_R1 = P1^2;
-  //4个QTI传感器定位
-  //从左到右
-  //  L1  L2  R2  R1
-	//黑色返回高电平
+#include "qti_sensor.h"
 
 
 void route_track_track() {
-  	if (route_track_qti_R1 == 0 && route_track_qti_L1 == 0) {
+  	if (QTI_R1() == 0 && QTI_L1() == 0) {
       //条件未编译测试，，要留意
-  		if (route_track_qti_R2 == route_track_qti_L2) {
+  		if (QTI_R2() == QTI_L2()) {
   			motor_forward();
   		}
-			else if (route_track_qti_L2 == 0 && route_track_qti_R2 == 1) {
+			else if (QTI_L2() == 0 && QTI_R2() == 1) {
 				motor_right();
 			}
 			else{
@@ -28,11 +20,11 @@ void route_track_track() {
 		//差速转弯
 
 		else {
-  			if (route_track_qti_L1 == 1 && route_track_qti_R1 == 0) {
+  			if (QTI_L1() == 1 && QTI_R1() == 0) {
   				motor_ccw();
   			}
 
-				else if(route_track_qti_L1 == 0 && route_track_qti_R1 == 1){
+				else if(QTI_L1() == 0 && QTI_R1() == 1){
 					motor_cw();
 				}
         //当外侧两QTI检测到黑色时采用比较激进的转弯方式
