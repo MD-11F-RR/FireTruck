@@ -2,40 +2,50 @@
 #include "motor.h"
 #include "delay.h"
 #include "qti_sensor.h"
+#include <stdio.h>
+#include "serial.h"
 
-
-
+sbit fire_sensor_L1 = P2^1;
+sbit fire_sensor_L2 = P2^3;
+sbit fire_sensor_M  = P2^5;
+sbit fire_sensor_R2 = P2^7;
+sbit fire_sensor_R1 = P2^0;
+/*
+火焰传感器排布（由左到右）
+L1  L2  M R2  R1
+检测到火焰返回低电平
+*/
 
 sbit fire_fan = P2^4;
 //灭火风扇，给低电平时转
 
 char fire_detected() {
   if (fire_sensor_R1 == 0) {
-		delay_nus(20);
+		delay_nus(50);
 		if (fire_sensor_R1 == 0){
 			return 5;
 		}
   }
   else if (fire_sensor_R2 == 0) {
-		delay_nus(20);
+		delay_nus(50);
 		if (fire_sensor_R2 == 0){
 			return 4;
 		}
   }
   else if (fire_sensor_M == 0) {
-		delay_nus(20);
+		delay_nus(50);
 		if (fire_sensor_M == 0){
 			return 3;
 		}
   }
   else if (fire_sensor_L1 == 0) {
-		delay_nus(20);
+		delay_nus(50);
 		if (fire_sensor_L1 == 0){
 			return 1;
 		}
   }
   else if (fire_sensor_L2 == 0) {
-		delay_nus(20);
+		delay_nus(50);
 		if (fire_sensor_L2 == 0){
 			return 2;
 		}
@@ -46,12 +56,12 @@ char fire_detected() {
 	//从左到右L1	L2	M	R2	R1	分别返回1	2	3	4	5
 	//返回0代表没有检测到火焰
 }
-
+/*
 void fire_putout() {
   char fire_before = 0;
-  char fire_passline = 0
+  char fire_passline = 0;
 
-	bit fire_direction = 0
+	bit fire_direction = 0;
 	//左转为0，右转为1
   motor_stop();
   if (QTI_L1() == 1) {
@@ -109,7 +119,7 @@ bit fire_QTI_L1(){
 	if (QTI_L1() == 1) {
 		delay_nus(15);
 		if (QTI_L1() == 1){
-			fire_before_L1 = 1;
+			//fire_before_L1 = 1;
 			return 1;
 		}
 	}
@@ -120,7 +130,7 @@ bit fire_QTI_R1(){
 	if (QTI_R1() == 1) {
 		delay_nus(15);
 		if (QTI_R1() == 1){
-			fire_before_R1 = 1;
+			//fire_before_R1 = 1;
 			return 1;
 		}
 	}
@@ -209,10 +219,14 @@ void fire_putout_2(const char spot) {
 	}
 	//RTB流程
 }
+*/
 
 void fire_putout_3(const char spot) {
 	bit fire_passline_R1 = 0;
 	bit fire_passline_L1 = 0;
+
+  serial_init();
+  printf("fire detected,spot %d\n",spot);
 
 	switch (spot) {
 		case 1:
@@ -234,72 +248,74 @@ void fire_putout_3(const char spot) {
 		switch (spot) {
 			case 1:
 			case 2:
-			if (fire_QTI_R1()) {
+			if (QTI_R1() == 1) {
 				fire_passline_R1 = 1;
+        printf("passlineR1\n");
 			}
 			break;
 
 			case 4:
 			case 5:
-			if (fire_QTI_L1()) {
+			if (QTI_L1() == 1) {
 				fire_passline_L1 = 1;
+        printf("passlineL1\n");
 			}
 			break;
 		}
 
 		if (fire_passline_R1) {
-			if (fire_QTI_L1()) {
+			if (QTI_L1()) {
 				motor_cw();
-				while (QTI_R2 || qti_L2);
+        delay_nms(20);
+				while(!QTI_R2() || !QTI_L2());
 				return;
 				//!!!!!!!!!!!!!!!!!!!!!!!
 			}
 		}
 		if (fire_passline_L1) {
-			if (fire_QTI_R1()) {
+			if (QTI_R1()) {
 				motor_ccw();
-				while (QTI_R2 || qti_L2);
+        delay_nms(20);
+				while(!QTI_R2() || !QTI_L2());
 				return;
 				//!!!!!!!!!!!!!!!!!!!!!!!
 			}
 		}
+
 	}
 	//记录是否越线，有黑即检测
+
 
 	motor_stop();
 	fire_fan = 0;
 	while(!fire_detected());
-	delay_nms(2500);
+	delay_nms(2000);
 	fire_fan = 1;
 	//停车灭火
-
+  printf("start to RTB\n");
 	switch (spot) {
 		case 1:
 		case 2:
-		if (fire_passline_R1) {
+		if (fire_passline_R1 == 1) {
 			motor_cw();
-			while (QTI_R2 || qti_L2);
-			break;
+      while(!QTI_R2() || !QTI_L2());
 		}
-		else{
-			break;
-		}
+    break;
 
-		case 3:
-		break;
 
 		case 4:
 		case 5:
-		if (fire_passline_L1) {
-			motor_ccw()
-			while (QTI_R2 || qti_L2);
+		if (fire_passline_L1 == 1) {
+			motor_ccw();
+			while(!QTI_R2() || !QTI_L2());
 		}
+    break;
 	}
 }
 
 
 
-
+/*
 
 void fire_fan_test(bit key) {
   if (key) {
@@ -309,7 +325,7 @@ void fire_fan_test(bit key) {
     fire_fan = 0;
   }
 }
-
+*/
 /*
 
   motor_stop();

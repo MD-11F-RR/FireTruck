@@ -398,6 +398,16 @@
               <FileType>1</FileType>
               <FilePath>.\motor.c</FilePath>
             </File>
+            <File>
+              <FileName>qti_sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\qti_sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>serial.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\serial.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

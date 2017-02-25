@@ -9,20 +9,13 @@ int main() {
   motor_speed(3);
 	EA = 1;
   while (1) {
-    /*
-    //route_track_track();
-    if (fire_detected() != 0) {
-      while(fire_detected() != 3);
-      fire_fan_test(0);
-      if (fire_detected() == 0) {
-        fire_fan_test(1);
-      }
+		
+    route_track_track();
+    if (fire_detected())  {
+      fire_putout_3(fire_detected());
     }
-    else{
-      fire_fan_test(1);
-    }
-    */
-    fire_putout();
+		
+		//route_track_track();
   }
   return 0;
 }
