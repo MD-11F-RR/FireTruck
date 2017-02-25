@@ -67,7 +67,9 @@ char fire_detected() {
 void fire_putout() {
   char fire_before = 0;
   char fire_passline = 0
-  char 
+
+	bit fire_direction = 0
+	//左转为0，右转为1
   motor_stop();
   if (route_track_qti_L1 == 1) {
     delay_nus(15);
@@ -87,36 +89,25 @@ void fire_putout() {
 
 
   while (1) {
-
-      while(fire_detected() != 3){
-
         switch (fire_detected()) {
+					case 1:
       		case 2:
-      		motor_speed(2);
       		motor_ccw();
-      		break;
+					fire_direction = 0;
+      		continue;
 
+					case 5:
       		case 4:
-      		motor_speed(2);
       		motor_cw();
-      		break;
+					fire_direction = 1;
+      		continue;
     			//靠内两个传感器检测到火焰后减速转向
-
-          case 1:
-      		motor_speed(3);
-      		motor_ccw();
-      		break;
-
-          case 5:
-          motor_speed(3);
-          motor_cw();
-          break;
 
     			default:
     			//default不做任何动作，延续之前动作
     			break;
 			}
-		}
+
     motor_stop();
 
     if (fire_detected() == 3) {
@@ -129,9 +120,122 @@ void fire_putout() {
 			//break大的while1
     }
   }
+}
+
+bit fire_QTI_L1(){
+	if (route_track_qti_L1 == 1) {
+		delay_nus(15);
+		if (route_track_qti_L1 == 1){
+			fire_before_L1 = 1;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+bit fire_QTI_R1(){
+	if (route_track_qti_R1 == 1) {
+		delay_nus(15);
+		if (route_track_qti_R1 == 1){
+			fire_before_R1 = 1;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+
+void fire_putout_2(const char spot) {
+	bit fire_before_L1 = 0;
+	bit fire_before_R1 = 0;
+	bit fire_passline_L1 = 0;
+	bit fire_passline_R1 = 0;
+
+	motor_stop();
+	fire_before_L1 = fire_QTI_L1();
+	fire_before_R1 = fire_QTI_R1();
+	//以上内容为检测初始值
+
+
+	switch (spot) {
+		case 1:
+		case 2:
+		motor_ccw();
+		break;
+
+		case 4:
+		case 5:
+		motor_cw()
+		break;
+
+		case 3:
+		motor_stop();
+		break;
+	}
+	while (fire_detected() != 3) {
+		switch (spot) {
+			case 1:
+			case 2:
+			if (fire_QTI_R1()) {
+				fire_passline_R1 = 1;
+			}
+			break;
+
+			case 4:
+			case 5:
+			if (fire_QTI_L1()) {
+				fire_passline_L1 = 1;
+			}
+			break;
+		}
+	}
+	motor_stop();
+
+	fire_fan = 0;
+	while(!fire_detected());
+	delay_nms(2500);
+	fire_fan = 1;
+	//开风扇流程
+
+	if (fire_passline_L1 || fire_passline_R1) {
+		switch (spot) {
+			case 1:
+			case 2:
+			motor_cw();
+			while (!fire_QTI_R1()) {
+			}
+			while (fire_QTI_R1()) {
+			}
+			//天啊，这能取下降沿嘛…………
+			return;
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!return可能会破坏程序逻辑！！！！
+			break;
+
+			case 4:
+			case 5:
+			motor_ccw();
+			while (!fire_QTI_L1()) {
+			}
+			while (fire_QTI_L1()) {
+			}
+			//天啊，这能取下降沿嘛…………
+			return;
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!return可能会破坏程序逻辑！！！！
+			break;
+		}
+	}
+
+	//RTB流程
 
 
 }
+
+
+
+
+
+
+
 void fire_fan_test(bit key) {
   if (key) {
     fire_fan = 1;
@@ -187,5 +291,22 @@ void fire_fan_test(bit key) {
 			//break大的while1
     }
   }
+
+*/
+
+
+
+/*
+if (fire_before_R1) {
+	while (fire_QTI_R1()) {	//#1
+		if (fire_detected() == 3) {
+			break;	//break #1 while
+		}
+	}
+
+	if (!fire_QTI_R1()) {
+		fire_passline_R1 = 1;
+	}
+}
 
 */
