@@ -61,140 +61,109 @@ char fire_detected() {
 	//返回0代表没有检测到火焰
 }
 
+
 void fire_putout_3(const char spot) {
-	bit fire_passline_R1 = 0;
-	bit fire_passline_L1 = 0;
+  bit fire_passline_R1 = 0;
+  bit fire_passline_L1 = 0;
 
-  serial_init();
-  printf("fire detected,spot %d\n",(int)spot);
+  switch (spot) {
+    case 1:
+    case 2:
+    motor_ccw();
+    break;
 
-	switch (spot) {
-		case 1:
-		case 2:
-		motor_ccw();
-		break;
+    case 4:
+    case 5:
+    motor_cw();
+    break;
 
-		case 4:
-		case 5:
-		motor_cw();
-		break;
+    case 3:
+    motor_stop();
+    break;
+  }
 
-		case 3:
-		motor_stop();
-		break;
-	}
-	//转向
-	while (fire_detected() != 3) {
-		switch (spot) {
-			case 1:
-			case 2:
-			if (QTI_R1() == 1) {
-				fire_passline_R1 = 1;
-        printf("passlineR1\n");
-			}
-			break;
+  while (fire_detected() != 3) {
+    switch (spot) {
+      case 1:
+      case 2:
+      if (QTI_R1()) {
+        fire_passline_R1 = 1;
+      }
+      break;
 
-			case 4:
-			case 5:
-			if (QTI_L1() == 1) {
-				fire_passline_L1 = 1;
-        printf("passlineL1\n");
-			}
-			break;
-		}
+      case 4:
+      case 5:
+      if (QTI_L1()) {
+        fire_passline_L1 = 1;
+      }
+      break;
+    }
+    //越线检测
 
-		if (fire_passline_R1) {
-			if (QTI_L1()) {
-				motor_cw();
-        delay_nms(20);
-        printf("miss, RTB\n");
-        while(1){
-          if (!QTI_R2()) {
-            break;
-          }
-          if (!QTI_L2()) {
+    if (fire_passline_R1) {
+      if (QTI_L1()) {
+        motor_cw();
+        while (1) {
+          if (QTI_R2()) {
             break;
           }
         }
-  		}
         motor_stop();
-        printf("RTB done\n");
-				return;
-				//!!!!!!!!!!!!!!!!!!!!!!!一个返回点
-			}
-		}
-		if (fire_passline_L1) {
-			if (QTI_R1()) {
-				motor_ccw();
-        delay_nms(20);
-        while(1){
-          if (!QTI_R2()) {
-            break;
-          }
-          if (!QTI_L2()) {
+        return;
+      }
+    }
+    if (fire_passline_L1) {
+      if (QTI_R1()) {
+        motor_ccw();
+        while (1) {
+          if (QTI_L2()) {
             break;
           }
         }
-  		}
-        printf("miss, RTB\n");
         motor_stop();
-        printf("RTB done\n");
-				return;
-				//!!!!!!!!!!!!!!!!!!!!!!!一个返回点！！
-			}
-		}
-
-	}
-	//记录是否越线，有黑即检测
-
-
-	motor_stop();
+        return;
+      }
+    }
+    //miss检测
+  }
+  motor_stop();
   motor_shutdown();
 	fire_fan = 0;
 	while(!fire_detected());
-	delay_nms(2000);
+	delay_nms(3000);
 	fire_fan = 1;
 	//停车灭火
   motor_init();
 
-  printf("start to RTB\n");
-	switch (spot) {
-		case 1:
-		case 2:
-		if (fire_passline_R1 == 1) {
-      motor_speed(1);
-			motor_cw();
-      while(1){
-        if (!QTI_R2()) {
+  if (fire_passline_R1 || fire_passline_L1) {
+    switch (spot) {
+      case 1:
+      case 2:
+      motor_cw();
+      while (1) {
+        if (QTI_L2()) {
           break;
         }
-        if (!QTI_L2()) {
-          break;
-        }
-      }
-		}
-    motor_stop();
-    motor_speed(3);
-    break;
-
-
-		case 4:
-		case 5:
-		if (fire_passline_L1 == 1) {
-      motor_speed(1);
-			motor_ccw();
-      while(1){
-        if (!QTI_R2()) {
-          break;
-        }
-        if (!QTI_L2()) {
+        if (QTI_R2()) {
           break;
         }
       }
-		}
-		}
-    motor_stop();
-    motor_speed(3);
-    break;
-	}
+      motor_stop();
+      break;
+
+      case 4:
+      case 5:
+      motor_ccw();
+      while (1) {
+        if (QTI_R2()) {
+          break;
+        }
+        if (QTI_L2()) {
+          break;
+        }
+      }
+      motor_stop();
+      break;
+    }
+  }
 }

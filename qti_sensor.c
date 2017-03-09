@@ -1,6 +1,6 @@
 #include "at89x52.h"
 #include "delay.h"
-
+//bit返回值为1就为检测到黑线
 
 sbit QTI_sensor_L1 = P1^5;
 sbit QTI_sensor_L2 = P1^4;
