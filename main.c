@@ -1,13 +1,24 @@
 #include "reg52.h"
 #include "motor.h"
 #include "route_track.h"
+#include "fire.h"
+#include "delay.h"
 
 int main() {
   motor_init();
   motor_speed(3);
 	EA = 1;
   while (1) {
-    route_track_track();
+
+
+    if (fire_detected())  {
+      fire_putout_3(fire_detected());
+    }
+		else{
+		route_track_track();
+		}
+
+
   }
   return 0;
 }
